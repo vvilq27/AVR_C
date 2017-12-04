@@ -38,7 +38,6 @@ void uart_put_char(char data){
 
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
-		//enables lcd update in main
 	uint8_t tmp_head;
 	char data;
 	data = UDR0;// get data from UART buffer
@@ -48,23 +47,25 @@ ISR(USART_RX_vect){
 		frame_type_char_count = 0;
 		return;
 	}
+	//get frame type to pick only GPRMC
 	if(frame_type_char_count < 5){
 		frame_type[frame_type_char_count] = data;
 		frame_type_char_count++;
 		return;
 	}
-
+	// if statement true when strings not equal
 	if(strncmp(frame_type, "GPRMC", 5)){
 		return;
 	}
-	enable = 1;	//enable main loop code
+
 	if(packet_tail != 1 && data != 0xa && data != 0xd ){ // if received /r or $ then ignore it
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
 
-		if(data == 'x' ){//ignore data after * in gps frame
+		if(data == '*' ){//ignore data after * in gps frame
 			packet_tail = 1;
+			enable = 1;	//enable main loop code
 			return;
 		}
 		// new head index value; if RxHead -> 31+1=32 -> 32 & 31 bitwise gives 0, which resets our index(head)

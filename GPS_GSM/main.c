@@ -16,6 +16,7 @@
 #include "headers/softuart.h"
 #include "headers/USART.h"
 #include "headers/nokia5110.h"
+#include "common.h"
 //#include <avr/pgmspace.h>
 //#include <avr/eeprom.h>
 
@@ -23,11 +24,18 @@
 volatile uint8_t enable;
 volatile uint8_t packet_tail;
 
+//wrzuc do common
+
+
+volatile GPS_frame gps;
+
+
 // numer 0x61 lub 97 to a wg tabeli charseti ascii tez
 //softuart: pc5 to RX a pc4 to TX
+//note about struct: if field is too small it will display on lcd chosen field and the one after that
 int main(){
-	DDRB |= 0x01;
-	DDRD |= 0x80;
+	DDRB |= 0x01;		//singalisation
+	DDRD |= 0x80;		//signalisation
 	sei();
 	USART_Init(__UBRR);
 	nokia_lcd_init();
@@ -37,53 +45,25 @@ int main(){
 	softuart_init();
 	softuart_turn_rx_on(); /* redundant - on by default */
 
-//	typedef struct{
-//		char type[6];
-//		char time[10];
-//		char foo[2];
-//		char lat[12];
-//		char ns[3];
-//		char lon[12];
-//		char we[3];
-//		char speed[5];
-//		char angle[5];
-//		char date[6];
-//	} GPS_frame;
+/*
+	struct thing{
+		char name[10];
+		char sname[10];
+	}person = {"jack", "foo"};
+	struct thing * ptr = &person;
+	*/
 
-//	GPS_frame gps;
 
-//
-//	uint8_t  screen_pointer = 0;
+	uint8_t  screen_pointer = 0;
 //	char string[10]="";
 //	char string2[10]="";
 //	enable = 1; //usart.c rx vect changes it
 //
-//	char str[80] = "GPRMC,094155.00,A,5213.24298,N,02100.49863,E,0.149,angle,241017,,,A";
-//	char str2[80] = "$GPRMC,094155.00,A,5213.24298,N,02100.49863,E,0.149,angle,241017,,,A";
-//	const char s[2] = ",";
 
+	const char s[2] = ",";
+	char sentence[80];
 
-	/* get the first token */		/*
-	strcpy(gps.type,strtok(str, s));
-	strcpy(gps.time,strtok(0, s));
-	strcpy(gps.foo,strtok(0, s));
-	strcpy(gps.lat,strtok(0, s));
-	strcpy(gps.ns,strtok(0, s));
-	strcpy(gps.lon,strtok(0, s));
-	strcpy(gps.we,strtok(0, s));
-
-
-	nokia_lcd_write_string(gps.type,1);
-	nokia_lcd_set_cursor(0, (screen_pointer+=8));
-	nokia_lcd_write_string(gps.time,1);
-	nokia_lcd_set_cursor(0, (screen_pointer+=8));
-	nokia_lcd_write_string(gps.lat,1);
-	nokia_lcd_write_string(gps.ns,1);
-	nokia_lcd_set_cursor(0, (screen_pointer+=8));
-	nokia_lcd_write_string(gps.lon,1);
-	nokia_lcd_write_string(gps.we,1);
-	nokia_lcd_render();			*/
-
+//	 get the first token
 //	token = strtok(str, s);
 //	while(token!=0){
 //		nokia_lcd_write_string(token,1);
@@ -93,63 +73,149 @@ int main(){
 //		_delay_ms(1000);
 //	}
 
-//	if(!strncmp(str2, "GPRMC", 5))
-//		PORTB |= 1;
-	nokia_lcd_write_string("  GPS    START", 2);
-	nokia_lcd_render();
-	_delay_ms(1000);
+
+//	nokia_lcd_write_string("  GPS    START", 2);
+//	nokia_lcd_render();
+//	_delay_ms(1000);
 
 //char GPS_frame_data[70];
 
 //w usart rx mozna wrzucic sprawdzanie jaki typ ramki wchodzi za pomoca strcmp
 // chce miec GPS_frame_data zeby w tym sprawdzac rodzaj ramki
+	char temp_c;
+
+	char cos[17] = "hans,,mad,klos";
+	char alfa[5] ;
+	char beta[10];
+	char gama[10];
+
+	strcpy(alfa,strtok(cos, s));
+	strcpy(beta,strtok(0, s));
+	strcpy(gama,strtok(0, s));
+
+	nokia_lcd_write_string(alfa,1);
+	nokia_lcd_set_cursor(0, (screen_pointer+=8));
+	nokia_lcd_write_string(beta,1);
+	nokia_lcd_set_cursor(0, (screen_pointer+=8));
+	nokia_lcd_write_string(gama,1);
+	nokia_lcd_render();
 
 	while(1){
-//			//zrob diode w timerze
-		if(enable){
+		PORTB ^= 1;
+		_delay_ms(100);
+//		char str[80] = "GPRMC,094155.00,A,5213.24298,N,02100.49863,E,0.149,angle,241017,,,A";
+//		char str2[80] = "GPRMC,194154.00,A,9215.24298,N,12100.49863,E,0.12,angle,241017,,,A";
+
+//		_delay_ms(1000);
+//		strcpy(gps.type,strtok(str, s));
+//			strcpy(gps.time,strtok(0, s));
+//			strcpy(gps.foo,strtok(0, s));
+//			strcpy(gps.lat,strtok(0, s));
+//			strcpy(gps.ns,strtok(0, s));
+//			strcpy(gps.lon,strtok(0, s));
+//			strcpy(gps.we,strtok(0, s));
+//
+//			nokia_lcd_clear();
+//			nokia_lcd_set_cursor(0, 0);
+//			screen_pointer = 0;
+//			nokia_lcd_write_string(gps.type,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.time,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.lat,1);
+//			nokia_lcd_write_string(gps.ns,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.lon,1);
+//			nokia_lcd_write_string(gps.we,1);
+//
+//			nokia_lcd_render();
+
+
+			//test structure
+//			if(change){
+//				strcpy(ptr->name,"lolo");
+//				strcpy(ptr->sname,"solo");
+//			}else {
+//				strcpy(ptr->name,"bolo");
+//				strcpy(ptr->sname,"pikolo");
+//			}
+//			change ^= 1;
+	/*	if(enable){
 			PORTB |= 0x01;
 
 			nokia_lcd_clear();
 			nokia_lcd_set_cursor(0, 0);
 
-//			uint8_t data_size =0;
-			/*while(UART_RxHead != UART_RxTail){
-				GPS_frame_data[data_size] = uart_get_char();
-				data_size++;
-			}
-			for(uint8_t i = 0; i < data_size; i++){
-				nokia_lcd_write_char(GPS_frame_data[i], 1);
-//				uart_put_char(GPS_frame_data[i]);
-			}*/
-			for(uint8_t i = 0; i < 5; i++){
-				nokia_lcd_write_char(frame_type[i], 1);
+			//write GPRMC
+//			for(uint8_t i = 0; i < 5; i++)
+//				nokia_lcd_write_char(frame_type[i], 1);
+//
+//			nokia_lcd_set_cursor(0,8);
 
+			//do przerwania rx    <<<<<<<<<<<<<<<<<<<<<
+			uint8_t i = 0;
+			while(UART_RxTail != UART_RxHead){
+				temp_c = uart_get_char();
+					sentence[i] = temp_c;
+					++i;
 			}
-			nokia_lcd_set_cursor(0,8);
-			while(UART_RxHead != UART_RxTail){
-				char c = uart_get_char();
-				nokia_lcd_write_char(c, 1);
-				softuart_putchar(c);
-			}
+
+			softuart_puts(sentence);
 			softuart_puts("\r\n");
+
+			strcpy(gps.time,strtok(sentence, s));
+			strcpy(gps.foo,strtok(0, s));
+			strcpy(gps.lat,strtok(0, s));
+//			strcpy(gps.ns,strtok(0, s));
+//			strcpy(gps.lon,strtok(0, s));
+//			strcpy(gps.we,strtok(0, s));
+//			strcpy(gps.speed,strtok(0, s));
+//			strcpy(gps.angle,strtok(0, s));
+//			strcpy(gps.date,strtok(0, s));
+
+
+			strcpy(alfa,strtok(cos, s));
+			strcpy(beta,strtok(0, s));
+			nokia_lcd_write_string(alfa,1);
+			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+			nokia_lcd_write_string(beta,1);
+
+			screen_pointer = 0;
+//			nokia_lcd_write_string(gps.time,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.lat,1);
+//			nokia_lcd_write_string(" ",1);
+//			nokia_lcd_write_string(gps.ns,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.lon,1);
+//			nokia_lcd_write_string(" ",1);
+//			nokia_lcd_write_string(gps.we,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.speed,1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			if(gps.angle != 0)
+//			nokia_lcd_write_string(gps.angle,1);
+//			else
+//				nokia_lcd_write_string("0",1);
+//			nokia_lcd_set_cursor(0, (screen_pointer+=8));
+//			nokia_lcd_write_string(gps.date,1);
+
 			nokia_lcd_render();
 
-			// test uart data buffer
-			/*
-			nokia_lcd_set_cursor(0,40);
-			nokia_lcd_write_string(itoa(packet_tail, string,10),1);
-			nokia_lcd_write_string("  ", 1);
-			nokia_lcd_write_string(itoa(UART_RxHead, string,10),1);
-			nokia_lcd_write_string("  ", 1);
-			nokia_lcd_write_string(itoa(UART_RxTail , string,10),1);
-			nokia_lcd_write_string("  ", 1);
-			nokia_lcd_write_string(itoa(data_size , string,10),1);
+			softuart_puts(sentence);
+			softuart_puts("\r\n");
 
-										*/
+
+
+			//write GPRMC sentence
+//			while(UART_RxHead != UART_RxTail)
+//				nokia_lcd_write_char(uart_get_char(), 1);
+
+			nokia_lcd_render();
 
 			enable = 0;
 			PORTB &= ~0x01;
-		}
+		}	// end of if		*/
 
-	}
-}
+	} 	// end of while loop
+}	// end of main
