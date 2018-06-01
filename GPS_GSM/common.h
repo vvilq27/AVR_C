@@ -8,6 +8,10 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+#define F_CPU 8000000UL
+#define __UBRR ((F_CPU+UART_BAUD*8UL) / (16UL*UART_BAUD)-1)
+
+//prob can be done smaller
 typedef struct{
 	char type[6];
 	char time[10];
@@ -22,7 +26,11 @@ typedef struct{
 } GPS_frame;
 
 
-
+volatile uint8_t enable;
+volatile uint8_t packet_tail;
+volatile char sentence[48];
+volatile GPS_frame gps;
+volatile uint8_t sizeOfSentence;
 
 
 #endif /* COMMON_H_ */

@@ -9,8 +9,8 @@ void USART_Init(unsigned int baud){
 	//set baud rate
 	UBRR0H = (uint8_t) (baud>>8);
 	UBRR0L = (uint8_t) (baud);
-//	enable receiver and transmitter and RX INTERRUPT
-	UCSR0B |= (1<<RXEN0) | (1<<TXEN0)|(1<<RXCIE0);
+//	enable receiver and transmitter and TX/ RX INTERRUPT
+	UCSR0B |= (1<<RXEN0) | (1<<TXEN0)|(1<<RXCIE0)|(1<<TXCIE0);
 //	set frame format: 8 data bits, 1 stop bits, no parity
 	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01);
 }
@@ -36,6 +36,12 @@ void uart_put_char(char data){
 	UCSR0B |= (1<<UDRIE0);
 }
 
+void uart_put_str(const char* s){
+	while(*s)
+		uart_put_char(*s++);
+}
+
+//usart receive handling
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
 	uint8_t tmp_head;
@@ -47,13 +53,13 @@ ISR(USART_RX_vect){
 		frame_type_char_count = 0;
 		return;
 	}
-	//get frame type to pick only GPRMC
+	//get frame type to check in next step if it is GPRMC
 	if(frame_type_char_count < 5){
 		frame_type[frame_type_char_count] = data;
 		frame_type_char_count++;
 		return;
 	}
-	// if statement true when strings not equal
+	// if statement true when strings not equal, if equal we continue parsing
 	if(strncmp(frame_type, "GPRMC", 5)){
 		return;
 	}
@@ -65,19 +71,21 @@ ISR(USART_RX_vect){
 
 		if(data == '*' ){//ignore data after * in gps frame
 			packet_tail = 1;
+			PORTB |= (1<<PB0);									//LED
 			enable = 1;	//enable main loop code
 			return;
 		}
+
 		// new head index value; if RxHead -> 31+1=32 -> 32 & 31 bitwise gives 0, which resets our index(head)
-		tmp_head = ( UART_RxHead + 1 ) & UART_RX_BUFF_MASK;
-		UART_RxHead = tmp_head;
-		UART_RxBuff[tmp_head] = data;
+		tmp_head = ( UART_RxHead + 1 ) & UART_RX_BUFF_MASK;		//shifting rx buffer index
+		UART_RxHead = tmp_head;									//shifting rx buffer index, may be as one liner
+		UART_RxBuff[tmp_head] = data;							//insert char from rx hard buff to rx soft buff
 	}
 }
 
 //UDR0 empty interrupt
 ISR(USART_UDRE_vect){
-
+	PORTD ^= (1<<PD7);
 	if(UART_TxHead != UART_TxTail ){
 		UART_TxTail = (UART_TxTail + 1) & UART_TX_BUFF_MASK;
 		UDR0 = UART_TxBuff[UART_TxTail];
