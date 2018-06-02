@@ -25,10 +25,9 @@ void gsm_update(void){
 	sprintf(sentence, "%s,%s,%s,%s,%s,%s,%s,%s\r\n", gps.time,gps.lat, gps.ns, gps.lon, gps.we, gps.speed, gps.angle, gps.date);
 	sprintf(sendCommand, "at+cipsend=%i\r\n", sizeof(sentence));
 //	uart_put_str(sendCommand);
-	uart_put_str("\r\n");
 	uart_put_str("formated sentence gsm update: \r\n");
 	uart_put_str(sentence);
-	uart_put_str("\r\n");
+	uart_put_str("=====================\r\n");
 
 	_delay_ms(100);
 

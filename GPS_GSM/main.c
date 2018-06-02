@@ -44,7 +44,7 @@ int main(){
 		if(!timer2){
 			gps_parse();
 			gsm_update();
-			timer2 = 5;
+			timer2 = 20;
 
 		}
 	} 	// end of while loop
