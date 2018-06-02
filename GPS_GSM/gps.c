@@ -14,68 +14,73 @@ const char s[2] = ",";
 
 //$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
 //$GPRMC,123519,A,,,,,,,230394,,W*6A
-//$GPRMC,123519,A,3,4,5,6,7,8,230394,,W*6A
+//$GPRMC,1 time,A,3 lat,4 ns,5 lon,6 we,7 speed,8 ang,9 date,,W*6A
 //,123519,A, , , , , , ,230394, ,W
 //,123519,A,,,,,,,230394,,W   this is in uart buff
+
+//version with putting spaces thru array
 void gps_parse(void){
 	uint8_t i = 0;	//reset sentence index
-	uint8_t gpsDelimiterCnt = 0;
-	char bf[8];
+	char bf[8];			//buffer for printing flag register
 	char temp_c;	//tmp char holder to copy whole sentence
 	//flags goes like: 8.date 7.angle 6.speed 5.we 4.lat 3.ns 2.lon 1.time
-	uint8_t structFlags = 0;
-
+	uint8_t gpsEmptyFieldCnt = 0;
+	uint8_t comaCnt = 0;
 	//scanning gps rx buffer to find empty fields and put there space, NOT USED, sending raw buffer now
 	while(UART_RxTail != UART_RxHead){
 		temp_c = uart_get_char();
 //		uart_put_char(temp_c); test
+		if(temp_c == ',')
+			comaCnt++;
 		if(temp_c == ',' && sentence[i-1]==','){
 
-			switch(++gpsDelimiterCnt){
+			switch(++gpsEmptyFieldCnt){
 				case 1:						//time
-					structFlags |= (1<<0);
+
 					break;
 
 				case 3:						//lat
-					structFlags |= (1<<1);
+
 					break;
 
 				case 4:						//ns
-					structFlags |= (1<<2);
+
 					break;
 
 				case 5:						//lon
-					structFlags |= (1<<3);
+
 					break;
 
 				case 6:						//we
-					structFlags |= (1<<4);
+
 					break;
 
 				case 7:						//speed
-					structFlags |= (1<<5);
+
 					break;
 
 				case 8:						//angle
-					structFlags |= (1<<6);
+
 					break;
 
 				case 9:						//date
-					structFlags |= (1<<7);
-					break;
 
+					break;
 			}//end switch
+
 			//separate comas with space
 			sentence[i++] = 32;		//put space
-			sentence[i++] = temp_c;	//put coma from gps sentence
+			sentence[i++] = 32;	//put coma from gps sentence
+			sentence[i++] = 32;
+			sentence[i++] = temp_c;
 			continue;
 		}//end if commas next to each other
 		//copy char like they go
 		sentence[i++] = temp_c;
 	}
-	uart_put_str("strct flag balues:  ");
-	uart_put_str(itoa(structFlags,bf,10));
-	uart_put_str("\r\n");
+//	uart_put_str("strct flag balues:  ");
+//	uart_put_str(itoa(structFlags,bf,10));
+//	uart_put_str("\r\n");
 
 	uart_put_str("printing rawe sentence: \r\n");
 	uart_put_str(sentence);
@@ -83,8 +88,9 @@ void gps_parse(void){
 
 	//parse and put GPS data in struct
 	//after parsing theres date left, it cuts all parts before
+/*
 	if(structFlags & (1<<0)){
-		strcpy(gps.time,"      ");
+		strcpy(gps.time,"         ");
 		uart_put_str("no time \r\n");
 	}else
 		strcpy(gps.time,strtok(sentence, s));
@@ -138,6 +144,15 @@ void gps_parse(void){
 		uart_put_str("no date \r\n");
 	}else
 		strcpy(gps.date,strtok(0, s));
-
+*/
+	strcpy(gps.time,strtok(sentence, s));
+	strcpy(gps.foo,strtok(0, s));
+	strcpy(gps.lat,strtok(0, s));
+	strcpy(gps.ns,strtok(0, s));
+	strcpy(gps.lon,strtok(0, s));
+	strcpy(gps.we,strtok(0, s));
+	strcpy(gps.speed,strtok(0, s));
+	strcpy(gps.angle,strtok(0, s));
+	strcpy(gps.date,strtok(0, s));
 }
 
