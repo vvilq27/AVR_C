@@ -17,6 +17,7 @@ const char s[2] = ",";
 //$GPRMC,1 time,A,3 lat,4 ns,5 lon,6 we,7 speed,8 ang,9 date,,W*6A
 //,123519,A, , , , , , ,230394, ,W
 //,123519,A,,,,,,,230394,,W   this is in uart buff
+//,d,f,l,n,l,w,s,a,d,
 
 //version with putting spaces thru array
 void gps_parse(void){
@@ -28,11 +29,23 @@ void gps_parse(void){
 	uint8_t comaCnt = 0;
 	//scanning gps rx buffer to find empty fields and put there space, NOT USED, sending raw buffer now
 	while(UART_RxTail != UART_RxHead){
-		temp_c = uart_get_char();
-//		uart_put_char(temp_c); test
-		if(temp_c == ',')
+		sentence[i++] = uart_get_char();
+		sentenceCharCnt++;
+	}
+	uart_put_str(sentence);
+	uart_put_str("\r\n");
+	i = 0;
+
+/*
+	while(i++ < 48){
+		if(sentenceTmp[i] == ',')
 			comaCnt++;
 		if(temp_c == ',' && sentence[i-1]==','){
+			if(++gpsEmptyFieldCnt >= 3){
+				for(int a = 0; a<10; a++)
+					sentence[i++] = 32;
+			}
+
 
 			switch(++gpsEmptyFieldCnt){
 				case 1:						//time
@@ -70,25 +83,20 @@ void gps_parse(void){
 
 			//separate comas with space
 			sentence[i++] = 32;		//put space
-			sentence[i++] = 32;	//put coma from gps sentence
-			sentence[i++] = 32;
 			sentence[i++] = temp_c;
 			continue;
-		}//end if commas next to each other
+//		}//end if commas next to each other
 		//copy char like they go
-		sentence[i++] = temp_c;
+//		sentence[i++] = temp_c;
 	}
-//	uart_put_str("strct flag balues:  ");
-//	uart_put_str(itoa(structFlags,bf,10));
-//	uart_put_str("\r\n");
 
-	uart_put_str("printing rawe sentence: \r\n");
-	uart_put_str(sentence);
-	uart_put_str("\r\n");
+
+//	uart_put_str("printing rawe sentence: \r\n");
+//	uart_put_str(sentence);
+//	uart_put_str("\r\n");
 
 	//parse and put GPS data in struct
 	//after parsing theres date left, it cuts all parts before
-/*
 	if(structFlags & (1<<0)){
 		strcpy(gps.time,"         ");
 		uart_put_str("no time \r\n");
@@ -144,7 +152,7 @@ void gps_parse(void){
 		uart_put_str("no date \r\n");
 	}else
 		strcpy(gps.date,strtok(0, s));
-*/
+
 	strcpy(gps.time,strtok(sentence, s));
 	strcpy(gps.foo,strtok(0, s));
 	strcpy(gps.lat,strtok(0, s));
@@ -154,5 +162,6 @@ void gps_parse(void){
 	strcpy(gps.speed,strtok(0, s));
 	strcpy(gps.angle,strtok(0, s));
 	strcpy(gps.date,strtok(0, s));
+	*/
 }
 

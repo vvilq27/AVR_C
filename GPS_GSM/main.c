@@ -42,9 +42,11 @@ int main(){
 		}
 
 		if(!timer2){
-			gps_parse();
-			gsm_update();
 			timer2 = 20;
+			gps_parse();
+
+			gsm_update();
+			PORTD ^= (1<<PD7);
 
 		}
 	} 	// end of while loop

@@ -28,7 +28,9 @@ typedef struct{
 
 volatile uint8_t enable;
 volatile uint8_t packet_tail;
+//volatile char sentenceTmp[48];
 volatile char sentence[48];
+volatile uint8_t sentenceCharCnt;
 volatile GPS_frame gps;
 volatile uint8_t sizeOfSentence;
 

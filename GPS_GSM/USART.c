@@ -85,7 +85,6 @@ ISR(USART_RX_vect){
 
 //UDR0 empty interrupt
 ISR(USART_UDRE_vect){
-	PORTD ^= (1<<PD7);
 	if(UART_TxHead != UART_TxTail ){
 		UART_TxTail = (UART_TxTail + 1) & UART_TX_BUFF_MASK;
 		UDR0 = UART_TxBuff[UART_TxTail];
