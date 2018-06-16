@@ -8,46 +8,56 @@
 #include "common.h"
 
 
-// numer 0x61 lub 97 to a wg tabeli charset(nokia) i ascii tez, takze charset==ascii
-//softuart: pc5 to RX a pc4 to TX
-//note about struct: if field is too small it will display on lcd chosen field and the one after that
-//softuart uses TIMER0
-//itoa na zmiennej timmer powodowalo dziwne dzialanie programu, byc moze juz konczy sie ram
 volatile uint16_t timer1, timer2;
 
 int main(){
+	//enable PD7 % PB0 pins for led flags
 	DDRB |= 0x01;		//singalisation
 	DDRD |= 0x80;		//signalisation gsm update
 
-	sei();
+	//setup gsm module for UDP
+	timer1 = 100;
+	gsm_init();
+
 	USART_Init(__UBRR);
-//	softuart_init();
-//	softuart_turn_rx_on();  //redundant - on by default
+	gsm_init();
+	PORTB |= (1<<PB0);
+
+
+
+	timer2 = 50;
 	timer1_init();
+	sei();
 
-	timer1 = 5;
-	timer2 = 10;
-
+	//check if frame is ok - 57 chars, to send it to server
 	//======================================
 	//				Main Loop
 	//======================================
-	//removing softuart, hardware uart will do everything
-	//problem: jak mierzyc dlugosc wysylanego textu na serva przez cipsend
-	//ew jak ustawic spacje w sentence, zeby ciagle miala taka sama dlugosc
 	while(1){
+/*
 		if(!timer1){
-			timer1 = 50;
+			timer1 = 1800;
 			//reset gsm module
-//			gsm_init();
+			gsm_init();
 		}
+*/
 
 		if(!timer2){
-			timer2 = 20;
+			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
+			while(!frame_rcv_flag);	//wait for gps data
+
+			PORTB |= (1<<PB0);
 			gps_parse();
-
 			gsm_update();
-			PORTD ^= (1<<PD7);
 
+			uart_put_str("\r\n");
+
+			frame_rcv_flag = 0;
+			UCSR0B &= ~ (1<<RXCIE0);	//disable rx
+			PORTB &= ~(1<<PB0);
+			timer2 = 150;			//inteval setup
 		}
+
 	} 	// end of while loop
+
 }	// end of main

@@ -10,7 +10,7 @@ void USART_Init(unsigned int baud){
 	UBRR0H = (uint8_t) (baud>>8);
 	UBRR0L = (uint8_t) (baud);
 //	enable receiver and transmitter and TX/ RX INTERRUPT
-	UCSR0B |= (1<<RXEN0) | (1<<TXEN0)|(1<<RXCIE0)|(1<<TXCIE0);
+	UCSR0B |= (1<<TXEN0)| (1<<RXEN0) ;// | (1<<TXCIE0); //rx enabled in main loop
 //	set frame format: 8 data bits, 1 stop bits, no parity
 	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01);
 }
@@ -30,10 +30,11 @@ void uart_put_char(char data){
 	tmp_head = (UART_TxHead + 1) & UART_TX_BUFF_MASK;
 	while( tmp_head == UART_TxTail ){
 		//TODO:
+		//PORTD |= (1<<PD7);
 	}
 	UART_TxBuff[tmp_head] = data;
 	UART_TxHead = tmp_head;
-	UCSR0B |= (1<<UDRIE0);
+	UCSR0B |= (1<<UDRIE0); //starts TX interrupt
 }
 
 void uart_put_str(const char* s){
@@ -73,6 +74,7 @@ ISR(USART_RX_vect){
 			packet_tail = 1;
 			PORTB |= (1<<PB0);									//LED
 			enable = 1;	//enable main loop code
+			frame_rcv_flag = 1;									//enable gps_parse
 			return;
 		}
 
@@ -83,6 +85,7 @@ ISR(USART_RX_vect){
 	}
 }
 
+//caused IC reset, duno why
 //UDR0 empty interrupt
 ISR(USART_UDRE_vect){
 	if(UART_TxHead != UART_TxTail ){
