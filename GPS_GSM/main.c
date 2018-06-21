@@ -16,18 +16,23 @@ int main(){
 	DDRD |= 0x80;		//signalisation gsm update
 
 	//setup gsm module for UDP
-	timer1 = 100;
-	gsm_init();
+	timer1 = 10;
 
 	USART_Init(__UBRR);
-	gsm_init();
+
 	PORTB |= (1<<PB0);
 
+	uart_put_str("Starting\r\n");
 
-
-	timer2 = 50;
+	timer2 = 10;
 	timer1_init();
 	sei();
+
+//	while(timer2){
+//		if(!timer2)
+//			gsm_init();
+//	}
+	timer2 = 10;
 
 	//check if frame is ok - 57 chars, to send it to server
 	//======================================
@@ -44,6 +49,7 @@ int main(){
 
 		if(!timer2){
 			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
+			sentence_field_cnt = 0;
 			while(!frame_rcv_flag);	//wait for gps data
 
 			PORTB |= (1<<PB0);
@@ -55,7 +61,7 @@ int main(){
 			frame_rcv_flag = 0;
 			UCSR0B &= ~ (1<<RXCIE0);	//disable rx
 			PORTB &= ~(1<<PB0);
-			timer2 = 150;			//inteval setup
+			timer2 = 15;			//inteval setup
 		}
 
 	} 	// end of while loop

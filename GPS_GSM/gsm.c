@@ -24,4 +24,9 @@ void gsm_update(void){
 	sprintf(sendCommand, "at+cipsend=%i\r\n", sentenceCharCnt);
 	uart_put_str(sendCommand);
 	uart_put_str(sentence);
+	//to delete
+//	uart_put_str("\r\n");
+//	for(int i = 0; i < sentenceCharCnt; i++)
+//		uart_put_char(sentence[i]);
+
 }

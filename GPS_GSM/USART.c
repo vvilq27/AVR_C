@@ -1,6 +1,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include "headers/USART.h"
+#include "common.h"
 
 // uses register names declared in iom16.h not iom328p.h like wtf? i've lost 2 days on figuring that out
 
@@ -45,6 +46,7 @@ void uart_put_str(const char* s){
 //usart receive handling
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
+
 	uint8_t tmp_head;
 	char data;
 	data = UDR0;// get data from UART buffer
@@ -55,13 +57,13 @@ ISR(USART_RX_vect){
 		return;
 	}
 	//get frame type to check in next step if it is GPRMC
-	if(frame_type_char_count < 5){
+	if(frame_type_char_count < 6){
 		frame_type[frame_type_char_count] = data;
 		frame_type_char_count++;
 		return;
 	}
 	// if statement true when strings not equal, if equal we continue parsing
-	if(strncmp(frame_type, "GPRMC", 5)){
+	if(strncmp(frame_type, "GPRMC,", 6)){
 		return;
 	}
 
@@ -70,11 +72,12 @@ ISR(USART_RX_vect){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
 
-		if(data == '*' ){//ignore data after * in gps frame
+		if(data == 44)
+			sentence_field_cnt++;
+
+		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
 			packet_tail = 1;
-			PORTB |= (1<<PB0);									//LED
-			enable = 1;	//enable main loop code
-			frame_rcv_flag = 1;									//enable gps_parse
+			frame_rcv_flag = 1;			 //check main loop code; indicate new gps data					//enable gps_parse
 			return;
 		}
 
@@ -85,6 +88,7 @@ ISR(USART_RX_vect){
 	}
 }
 
+//disabled atm
 //caused IC reset, duno why
 //UDR0 empty interrupt
 ISR(USART_UDRE_vect){
