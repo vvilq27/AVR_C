@@ -10,13 +10,11 @@
 
 volatile uint16_t timer1, timer2;
 
+//tcpdump -i lo udp port 8125 -vv -X
 int main(){
 	//enable PD7 % PB0 pins for led flags
 	DDRB |= 0x01;		//singalisation
 	DDRD |= 0x80;		//signalisation gsm update
-
-	//setup gsm module for UDP
-	timer1 = 10;
 
 	USART_Init(__UBRR);
 
@@ -24,7 +22,7 @@ int main(){
 
 	uart_put_str("Starting\r\n");
 
-	timer2 = 10;
+//	timer2 = 25;
 	timer1_init();
 	sei();
 
@@ -32,20 +30,20 @@ int main(){
 //		if(!timer2)
 //			gsm_init();
 //	}
-	timer2 = 10;
+
+	timer1 = 200;
+	timer2 = 300;
 
 	//check if frame is ok - 57 chars, to send it to server
 	//======================================
 	//				Main Loop
 	//======================================
 	while(1){
-/*
 		if(!timer1){
-			timer1 = 1800;
+			timer1 = 600;
 			//reset gsm module
 			gsm_init();
 		}
-*/
 
 		if(!timer2){
 			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
@@ -54,14 +52,17 @@ int main(){
 
 			PORTB |= (1<<PB0);
 			gps_parse();
-			gsm_update();
+			//check if enough data to send to server
+			if(sentenceCharCnt > 50)
+				gsm_update();
 
-			uart_put_str("\r\n");
+			//delete
+//			uart_put_str("\r\n");
 
 			frame_rcv_flag = 0;
 			UCSR0B &= ~ (1<<RXCIE0);	//disable rx
 			PORTB &= ~(1<<PB0);
-			timer2 = 15;			//inteval setup
+			timer2 = 150;			//inteval setup
 		}
 
 	} 	// end of while loop

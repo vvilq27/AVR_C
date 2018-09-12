@@ -11,10 +11,12 @@ void gsm_init(void){
 	_delay_ms(50);
 	uart_put_str( "AT+CSTT=\"Internet\",\"\",\"\"\r\n" );
 	_delay_ms(50);
+	uart_put_str( "AT+CIICR\r\n");
+	_delay_ms(150);
 	uart_put_str( "AT+CIFSR\r\n");
 	_delay_ms(50);
 	uart_put_str( "AT+CIPSTART=\"UDP\",\"89.65.242.51\",9999\r\n" );
-	_delay_ms(50);
+	_delay_ms(150);
 }
 
 //example string to send:
@@ -23,7 +25,9 @@ void gsm_update(void){
 	char sendCommand[16];
 	sprintf(sendCommand, "at+cipsend=%i\r\n", sentenceCharCnt);
 	uart_put_str(sendCommand);
+	_delay_ms(50);
 	uart_put_str(sentence);
+	uart_put_str("\r\n");
 	//to delete
 //	uart_put_str("\r\n");
 //	for(int i = 0; i < sentenceCharCnt; i++)

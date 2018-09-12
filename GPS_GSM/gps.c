@@ -10,17 +10,15 @@
 //$GPRMC,123519,A,,,,,,,230394,,W*6A
 //1,A2,3,4,5,6,7,8,9,0,W*6A
 void gps_parse(void){
-	uint8_t i = 0;	//reset sentence index
+//	uint8_t i = 0;	//reset sentence index
 	sentenceCharCnt = 0;
 
 	memset(sentence, 0, sizeof(sentence));
-	//to delete
-//	for(int c = 0; c < sizeof(sentence); c++)
-//		sentence[c] = '\0';
+
 
 	while(UART_RxTail != UART_RxHead){
-		sentence[i++] = uart_get_char();
-		sentenceCharCnt++;
+		sentence[sentenceCharCnt++] = uart_get_char();
+//		sentenceCharCnt++;
 	}
 }
 
