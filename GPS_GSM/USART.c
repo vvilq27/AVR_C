@@ -54,7 +54,6 @@ ISR(USART_RX_vect){
 
 	//got new sentence, reset parsing flags
 	if(data == '$'){
-		sentence_collected = 0;
 		frame_type_char_count = 0;
 		return;
 	}
@@ -70,7 +69,8 @@ ISR(USART_RX_vect){
 		return;
 	}
 
-	if(sentence_collected != 1 && data != 0xa && data != 0xd ){ // if received /r or $ then ignore it
+	//collecting chars of GPRMC sentence
+	if(sentence_collected != 1 && data != 0xa && data != 0xd ){ // if received /r or $  or sentence collected then ignore it
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
@@ -80,7 +80,6 @@ ISR(USART_RX_vect){
 
 		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
 			sentence_collected = 1;
-			frame_rcv_flag = 1;			 //check main loop code; indicate new gps data					//enable gps_parse
 			return;
 		}
 

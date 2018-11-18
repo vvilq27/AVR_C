@@ -9,7 +9,6 @@ volatile uint8_t sentence_collected;			//flag indicates that all data collected 
 volatile char sentence[64];
 volatile uint8_t sentenceCharCnt;		//used for gsm cipsend cmnd
 volatile uint8_t sizeOfSentence;
-volatile uint8_t frame_rcv_flag;		//flag indicates that new GPRM C sntnc arrived
 volatile uint8_t sentence_field_cnt;	//flag used to count commas, and discard data after date field in GPRMC sntnc
 
 #endif /* COMMON_H_ */
