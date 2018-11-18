@@ -13,10 +13,10 @@ extern volatile uint16_t timer1, timer2;
 
 void timer1_init(void){
 //	TCCR1A |=	0;
-	TCCR1B |= 	(1<<CS12) | (1<<CS10);	//prescaler 1024
+	TCCR1B |= 	(1<<CS11) | (1<<CS10);	//prescaler 64
 	TIMSK1 |=	(1<<TOIE1);	//inter enable
 	//set counter value for needed period
-	TCNT1 =	64754;	//interupt 100ms for 8mhz &1024 presc
+	TCNT1 =	63974;	//interupt 100ms for 1mhz &64 presc
 
 }
 
@@ -29,5 +29,5 @@ ISR(TIMER1_OVF_vect){
 	cnt = timer2;
 	if(cnt) timer2 = --cnt;
 	//set counter value for needed period
-	TCNT1 =	64754;
+	TCNT1 =	63974;
 }

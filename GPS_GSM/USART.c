@@ -8,8 +8,9 @@
 void USART_Init(unsigned int baud){
 	DDRD |= (1<<6);
 	//set baud rate
-	UBRR0H = (uint8_t) (baud>>8);
-	UBRR0L = (uint8_t) (baud);
+//	UBRR0H = (uint8_t) (baud>>8);
+	UBRR0L = baud;
+	UCSR0A|=(1<<U2X0);//double speed aysnc
 //	enable receiver and transmitter and TX/ RX INTERRUPT
 	UCSR0B |= (1<<TXEN0)| (1<<RXEN0) ;// | (1<<TXCIE0); //rx enabled in main loop
 //	set frame format: 8 data bits, 1 stop bits, no parity
@@ -51,8 +52,9 @@ ISR(USART_RX_vect){
 	char data;
 	data = UDR0;// get data from UART buffer
 
+	//got new sentence, reset parsing flags
 	if(data == '$'){
-		packet_tail = 0;
+		sentence_collected = 0;
 		frame_type_char_count = 0;
 		return;
 	}
@@ -62,21 +64,22 @@ ISR(USART_RX_vect){
 		frame_type_char_count++;
 		return;
 	}
+	//we got frame name now, time to check its type
 	// if statement true when strings not equal, if equal we continue parsing
 	if(strncmp(frame_type, "GPRMC,", 6)){
 		return;
 	}
 
-	if(packet_tail != 1 && data != 0xa && data != 0xd ){ // if received /r or $ then ignore it
+	if(sentence_collected != 1 && data != 0xa && data != 0xd ){ // if received /r or $ then ignore it
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
 
-		if(data == 44)
+		if(data == 44)		//if comma
 			sentence_field_cnt++;
 
 		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
-			packet_tail = 1;
+			sentence_collected = 1;
 			frame_rcv_flag = 1;			 //check main loop code; indicate new gps data					//enable gps_parse
 			return;
 		}

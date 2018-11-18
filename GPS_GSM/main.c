@@ -7,6 +7,7 @@
 #include "headers/nokia5110.h"
 #include "common.h"
 
+#define F_CPU 1000000UL
 
 volatile uint16_t timer1, timer2;
 
@@ -16,23 +17,23 @@ int main(){
 	DDRB |= 0x01;		//singalisation
 	DDRD |= 0x80;		//signalisation gsm update
 
-	USART_Init(__UBRR);
+	//ubrr not needed, might be changed
+	USART_Init(12);
 
 	PORTB |= (1<<PB0);
 
 	uart_put_str("Starting\r\n");
 
-//	timer2 = 25;
 	timer1_init();
 	sei();
 
-//	while(timer2){
-//		if(!timer2)
-//			gsm_init();
-//	}
+//	PORTD |= (1<<PD7);
+//	timer2 = 20;
+//	while(timer2);
+//	PORTD ^= (1<<PD7);
 
-	timer1 = 200;
-	timer2 = 300;
+	timer1 = 10;	//GSM reset
+	timer2 = 300;	//data send
 
 	//check if frame is ok - 57 chars, to send it to server
 	//======================================
@@ -40,15 +41,16 @@ int main(){
 	//======================================
 	while(1){
 		if(!timer1){
-			timer1 = 600;
+			timer1 = 10;
 			//reset gsm module
-			gsm_init();
+			PORTD ^= (1<<PD7);
+//			gsm_init();
 		}
 
 		if(!timer2){
 			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
 			sentence_field_cnt = 0;
-			while(!frame_rcv_flag);	//wait for gps data
+			while(!frame_rcv_flag);	//wait for gps data from USART RX INT
 
 			PORTB |= (1<<PB0);
 			gps_parse();

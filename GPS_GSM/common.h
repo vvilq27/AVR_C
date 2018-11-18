@@ -1,11 +1,11 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
-#define F_CPU 8000000UL
-#define __UBRR ((F_CPU+UART_BAUD*8UL) / (16UL*UART_BAUD)-1)
+#define F_CPU 1000000UL
+#define __UBRR ((F_CPU+UART_BAUD*8UL) / (16UL*UART_BAUD)-1)	//not used
 
 
-volatile uint8_t packet_tail;			//flag indicates that all data collected from GPRMC sntnc
+volatile uint8_t sentence_collected;			//flag indicates that all data collected from GPRMC sntnc
 volatile char sentence[64];
 volatile uint8_t sentenceCharCnt;		//used for gsm cipsend cmnd
 volatile uint8_t sizeOfSentence;
