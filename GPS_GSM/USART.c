@@ -1,6 +1,6 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include "headers/USART.h"
+#include "headers/USART.h"	//may be deleted, debug purp
 #include "common.h"
 
 // uses register names declared in iom16.h not iom328p.h like wtf? i've lost 2 days on figuring that out
@@ -48,7 +48,6 @@ void uart_put_str(const char* s){
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
 
-	uint8_t tmp_head;
 	char data;
 	data = UDR0;// get data from UART buffer
 
@@ -80,13 +79,13 @@ ISR(USART_RX_vect){
 
 		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
 			sentence_collected = 1;
+			uart_put_str("got snt\r\n");
 			return;
 		}
 
 		// new head index value; if RxHead -> 31+1=32 -> 32 & 31 bitwise gives 0, which resets our index(head)
-		tmp_head = ( UART_RxHead + 1 ) & UART_RX_BUFF_MASK;		//shifting rx buffer index
-		UART_RxHead = tmp_head;									//shifting rx buffer index, may be as one liner
-		UART_RxBuff[tmp_head] = data;							//insert char from rx hard buff to rx soft buff
+		UART_RxHead = ( UART_RxHead + 1 ) & UART_RX_BUFF_MASK;		//shifting rx buffer index
+		UART_RxBuff[UART_RxHead] = data;							//insert char from rx hard buff to rx soft buff
 	}
 }
 

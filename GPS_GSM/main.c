@@ -12,6 +12,16 @@
 volatile uint16_t timer1, timer2;
 
 //tcpdump -i lo udp port 8125 -vv -X
+
+//general description:
+
+//data collected in tim2
+//module listen for gps data only when tim2 interval elapse and program
+//> enters tim2 body
+
+//PROBLEMS
+
+//delay func is not accurate
 int main(){
 	//enable PD7 % PB0 pins for led flags
 	DDRB |= 0x01;		//singalisation
@@ -36,33 +46,28 @@ int main(){
 	timer1 = 10;	//GSM reset
 	timer2 = 30;	//data send
 
-	//check if frame is ok - 57 chars, to send it to server
+	//57 chars, to send it to server
 	//======================================
 	//				Main Loop
 	//======================================
 	while(1){
-		if(!timer1){
-			timer1 = 10;
-			//reset gsm module
-			PORTD ^= (1<<PD7);
-//			gsm_init();
-		}
 
 		if(!timer2){
 			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
 			sentence_field_cnt = 0;
+			uart_put_str("waiting snt\r\n");
+			PORTD |= (1<<PD7);
 			while(!sentence_collected);	//wait for gps data from USART RX INT
-
-			PORTB |= (1<<PB0);
+			uart_put_str("gps parse\r\n");
 			gps_parse();
 			//check if enough data to send to server
-			if(sentenceCharCnt > 50)
+			if(sentenceCharCnt > 30)
 				gsm_update();
 
 			sentence_collected = 0;
 			UCSR0B &= ~ (1<<RXCIE0);	//disable rx
-			PORTB &= ~(1<<PB0);
-			timer2 = 150;			//inteval setup
+
+			timer2 = 50;			//inteval setup
 		}
 
 	} 	// end of while loop

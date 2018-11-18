@@ -23,12 +23,18 @@ void gsm_init(void){
 //,203141.00,A,5122.66485,N,02015.89398,E,0.704,,020618,,,AN
 void gsm_update(void){
 	char sendCommand[16];
+	//create string to send to GSM module, put it in sendCommand
+	//needed to give GSM module exact number of chars to send
 	sprintf(sendCommand, "at+cipsend=%i\r\n", sentenceCharCnt);
 	uart_put_str(sendCommand);
 	_delay_ms(50);
 	uart_put_str(sentence);
 	uart_put_str("\r\n");
-	//to delete
+
+	PORTD &= ~(1<<PD7);	//msg sent flag
+
+
+	//debug - delete later
 //	uart_put_str("\r\n");
 //	for(int i = 0; i < sentenceCharCnt; i++)
 //		uart_put_char(sentence[i]);

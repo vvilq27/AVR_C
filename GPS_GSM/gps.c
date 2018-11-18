@@ -13,12 +13,12 @@ void gps_parse(void){
 //	uint8_t i = 0;	//reset sentence index
 	sentenceCharCnt = 0;
 
+	//reset sending buffer to remove leftovers
 	memset(sentence, 0, sizeof(sentence));
 
-
+	//fill sending buffer with fresh data from circle buffer
 	while(UART_RxTail != UART_RxHead){
 		sentence[sentenceCharCnt++] = uart_get_char();
-//		sentenceCharCnt++;
 	}
 }
 
