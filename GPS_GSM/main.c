@@ -24,29 +24,20 @@ volatile uint16_t timer1, timer2;
 //delay func is not accurate
 int main(){
 	//enable PD7 % PB0 pins for led flags
-	DDRB |= 0x01;		//singalisation
-	DDRD |= 0x80;		//signalisation gsm update
+//	DDRB |= 0x01;		//singalisation
+//	DDRD |= 0x80;		//signalisation gsm update
 	sentence_collected_flag = 0;
 
 	//ubrr not needed, might be changed
 	USART_Init(12);
 
-	PORTB |= (1<<PB0);
-
-	uart_put_str("Starting\r\n");
-
 	timer1_init();
 	sei();
 
-//	PORTD |= (1<<PD7);
-//	timer2 = 20;
-//	while(timer2);
-//	PORTD ^= (1<<PD7);
+	timer1 = 5;	//GSM reset
+	timer2 = 200;	//first data send timeout
 
-	timer1 = 10;	//GSM reset
-	timer2 = 30;	//data send
-
-	//57 chars, to send it to server
+	//57 chars if full frame received, to send it to server
 	//======================================
 	//				Main Loop
 	//======================================
@@ -61,13 +52,13 @@ int main(){
 			uart_put_str("gps parse\r\n");
 			gps_parse();
 			//check if enough data to send to server
-			if(sentenceCharCnt > 30)
+			if(sentenceCharCnt > 50)
 				gsm_update();
 
 			sentence_collected_flag = 0;
 			UCSR0B &= ~ (1<<RXCIE0);	//disable rx
 
-			timer2 = 50;			//inteval setup
+			timer2 = 150;			//inteval setup
 		}
 
 	} 	// end of while loop

@@ -84,6 +84,7 @@ ISR(USART_RX_vect){
 		frame_type_char_count++;
 		return;
 	}
+
 	//we got frame name now, time to check its type
 	// if statement true when strings not equal, if equal we continue parsing
 	if(GPRMC_received_flag == 0){
@@ -92,6 +93,8 @@ ISR(USART_RX_vect){
 		else
 			GPRMC_received_flag = 1;
 	}
+//	if(strncmp(frame_type, "GPRMC,", 6))
+//		return;
 
 
 	//collecting chars of GPRMC sentence
@@ -99,7 +102,7 @@ ISR(USART_RX_vect){
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
-		PORTD |= (1<<PD7);
+//		PORTD |= (1<<PD7);
 		if(data == 44)		//if comma
 			sentence_field_cnt++;
 
@@ -115,7 +118,7 @@ ISR(USART_RX_vect){
 //		for(int i = 0; i < 6; i++)
 //			uart_put_char(frame_type[i]);
 	}
-	PORTD &= ~(1<<PD7);
+//	PORTD &= ~(1<<PD7);
 }
 
 //disabled atm
