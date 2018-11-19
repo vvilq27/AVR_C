@@ -31,7 +31,7 @@ volatile char UART_TxBuff[UART_TX_BUFF_SIZE];
 volatile uint8_t UART_TxHead;
 volatile uint8_t UART_TxTail;
 extern volatile uint8_t enable;
-extern volatile uint8_t sentence_collected;
+extern volatile uint8_t sentence_collected_flag;
 volatile char frame_type[6];
 volatile uint8_t frame_type_char_count;
 extern volatile uint8_t frame_rcv_flag;

@@ -69,7 +69,7 @@ void uart_put_str(const char* s){
 //usart receive handling ; enabled by RXCIE0 bit in UCSR0B
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
-
+	GPRMC_received_flag = 0;
 	char data;
 	data = UDR0;// get data from UART buffer
 
@@ -86,13 +86,16 @@ ISR(USART_RX_vect){
 	}
 	//we got frame name now, time to check its type
 	// if statement true when strings not equal, if equal we continue parsing
-	if(strncmp(frame_type, "GPRMC,", 6)){
-		return;
+	if(GPRMC_received_flag == 0){
+		if(strncmp(frame_type, "GPRMC,", 6))
+			return;
+		else
+			GPRMC_received_flag = 1;
 	}
 
 
 	//collecting chars of GPRMC sentence
-	if(sentence_collected != 1 && data != 0xa && data != 0xd ){ // if received /r or $  or sentence collected then ignore it
+	if(sentence_collected_flag != 1 && data != 0xa && data != 0xd ){ // if received /r or $  or sentence collected then ignore it
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
@@ -101,7 +104,7 @@ ISR(USART_RX_vect){
 			sentence_field_cnt++;
 
 		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
-			sentence_collected = 1;
+			sentence_collected_flag = 1;
 			return;
 		}
 
