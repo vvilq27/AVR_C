@@ -31,7 +31,7 @@ void gsm_update(void){
 	uart_put_str(sentence);
 	uart_put_str("\r\n");
 
-	PORTD &= ~(1<<PD7);	//msg sent flag
+//	PORTD &= ~(1<<PD7);	//msg sent flag
 
 
 	//debug - delete later

@@ -56,7 +56,7 @@ int main(){
 			UCSR0B |=  (1<<RXCIE0);	//enable rx, now we can listen for gps data
 			sentence_field_cnt = 0;
 			uart_put_str("waiting snt\r\n");
-			PORTD |= (1<<PD7);
+//			PORTD |= (1<<PD7);
 			while(!sentence_collected);	//wait for gps data from USART RX INT
 			uart_put_str("gps parse\r\n");
 			gps_parse();

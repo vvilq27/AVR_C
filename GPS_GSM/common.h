@@ -10,5 +10,5 @@ volatile char sentence[64];
 volatile uint8_t sentenceCharCnt;		//used for gsm cipsend cmnd
 volatile uint8_t sizeOfSentence;
 volatile uint8_t sentence_field_cnt;	//flag used to count commas, and discard data after date field in GPRMC sntnc
-
+volatile uint8_t GPRMC_received_flag;
 #endif /* COMMON_H_ */

@@ -27,6 +27,28 @@ char uart_get_char(void){
 	return UART_RxBuff[UART_RxTail];//output received data
 }
 
+void uart_put_int(uint8_t num){
+	static char s[5];
+	uint8_t v;
+	int k;	//can be negative
+	k=0;
+
+	while(num>0){
+		v = num/10;
+		s[k++] = num - v*10;
+		num = v;
+	}
+	if(k == 0)
+		s[k++] = 0;
+
+	while(k >= 0)
+		uart_put_char(s[k--]);
+
+//	uart_put_char(s[1]);
+//	uart_put_char(s[0]);
+
+}
+
 void uart_put_char(char data){
 	uint8_t tmp_head;
 	tmp_head = (UART_TxHead + 1) & UART_TX_BUFF_MASK;
@@ -44,7 +66,7 @@ void uart_put_str(const char* s){
 		uart_put_char(*s++);
 }
 
-//usart receive handling
+//usart receive handling ; enabled by RXCIE0 bit in UCSR0B
 //saving received data from hardware buffer to program buffer stored in RAM
 ISR(USART_RX_vect){
 
@@ -68,25 +90,29 @@ ISR(USART_RX_vect){
 		return;
 	}
 
+
 	//collecting chars of GPRMC sentence
 	if(sentence_collected != 1 && data != 0xa && data != 0xd ){ // if received /r or $  or sentence collected then ignore it
 //		if ( tmp_head == UART_RxTail ){
 //			// TODO:  handle somehow that occurance
 //		}	// like signal this error with turning on LED
-
+		PORTD |= (1<<PD7);
 		if(data == 44)		//if comma
 			sentence_field_cnt++;
 
 		if(sentence_field_cnt >= 9 ){//ignore data after * in gps frame
 			sentence_collected = 1;
-			uart_put_str("got snt\r\n");
 			return;
 		}
 
 		// new head index value; if RxHead -> 31+1=32 -> 32 & 31 bitwise gives 0, which resets our index(head)
 		UART_RxHead = ( UART_RxHead + 1 ) & UART_RX_BUFF_MASK;		//shifting rx buffer index
 		UART_RxBuff[UART_RxHead] = data;							//insert char from rx hard buff to rx soft buff
+
+//		for(int i = 0; i < 6; i++)
+//			uart_put_char(frame_type[i]);
 	}
+	PORTD &= ~(1<<PD7);
 }
 
 //disabled atm

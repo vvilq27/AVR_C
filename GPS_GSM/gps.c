@@ -20,5 +20,7 @@ void gps_parse(void){
 	while(UART_RxTail != UART_RxHead){
 		sentence[sentenceCharCnt++] = uart_get_char();
 	}
+	uart_put_str("parsed");
+	uart_put_int(sentenceCharCnt);
 }
 

@@ -37,7 +37,8 @@ ISR(TIMER1_OVF_vect){
 	if(!timer1){
 		timer1 = 10;
 		//reset gsm module
-		uart_put_str("blink\r\n");
+		uart_put_str("blink");
+//		uart_put_int(99);	// delete this after
 //			gsm_init();
 	}
 }
